@@ -14,20 +14,34 @@
 #ifndef MARKOV_GRAPH_HPP_
 #define MARKOV_GRAPH_HPP_
 
+#include <string>
 #include <list>
-#include "token.hpp"
+#include <memory>
+#include "./token.hpp"
+
+class Token;
 
 class MarkovGraph {
 	std::list<Token> tokens;
+	Token *last;	
+	// definitions
+	std::string BOP = "BOP";
+	std::string BOS = "BOS";
+	std::string EOP = "EOP";
+	std::string EOS = "EOS";
 
+	void insertToken(std::string &token);
 public:
 	MarkovGraph();
-
+	
+	// tokenize and print
 	// Insert multi paragraph text into graph
-	void insertText(string &text);
+	void insertText(std::string &text);
+
+	void print();
 
 	// Generate random text
-	unique_ptr<std::string> genText();
+	std::unique_ptr<std::string> genText();
 };
 
 #endif
