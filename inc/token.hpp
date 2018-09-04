@@ -12,9 +12,9 @@
 #ifndef TOKEN_HPP_
 #define TOKEN_HPP_
 
-#include "./token-base.hpp"
-#include "./markov-graph.hpp"
-#include "./token-reference.hpp"
+#include "token-base.hpp"
+#include "markov-graph.hpp"
+#include "token-reference.hpp"
 
 class TokenReference;
 

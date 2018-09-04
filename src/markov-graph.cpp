@@ -13,7 +13,7 @@
 
 #include <iostream>
 #include <algorithm>
-#include "../inc/markov-graph.hpp"
+#include "markov-graph.hpp"
 
 // Check for whitespace -- whitespace is defined as asci characters under the
 // value 21 and above value 126
@@ -53,50 +53,39 @@ MarkovGraph::MarkovGraph() : last(nullptr) {}
 // Insert single token
 void MarkovGraph::insertToken(std::string &token) {
 	// TODO: refactor
-	std::cout << "inserting: " << token << std::endl;
 	auto it = tokens.begin(), newEntry = tokens.begin();
 	for (; it != tokens.end(); it++) {
 		int result = alphabetic(token, it->getToken());
 		if (result < 0) {
-			std::cout << "next" << std::endl;
 			continue;
 		} else if (result == 0) {
-			std::cout << "found a match" << std::endl;
 			newEntry = it;
 			it->count++;
 			break;
 		} else {
-			std::cout << "making new insertion" << std::endl;
 			newEntry = tokens.emplace(it, token);
 			break;
 		}
 	}
-	if (it == tokens.end()) {
-		std::cout << "Adding to end" << std::endl;
+	if (it == tokens.end())
 		newEntry = tokens.emplace(it, token);
-	}
 	
 	// if last is not null, then insert reference
 	if (last != nullptr) {
-		std::cout << "Last: " << last->getToken() << std::endl;
 		auto j = last->refs.begin();
 		for (;j != last->refs.end(); j++) {
 			int result = alphabetic(newEntry->getToken(), j->getToken());
 			if (result < 0) {
-				std::cout << "TOKEN REF: next" << std::endl;
 				continue;
 			} else if (result == 0) {
-				std::cout << "TOKEN REF: found a match" << std::endl;
 				j->count++;
 				break;
 			} else {
-				std::cout << "TOKEN REF: making new insertion" << std::endl;
 				last->refs.emplace(j, *newEntry);
 				break;
 			}
 		}
 		if (j == last->refs.end()) {
-			std::cout << "TOKEN REF: Adding to end" << std::endl;
 			last->refs.emplace(j, *newEntry);
 		}
 	}
@@ -111,10 +100,6 @@ void MarkovGraph::insertText(std::string &text) {
 	bool endedSentence = false, parsingToken = false;
 	insertToken(BOP);
 	insertToken(BOS);
-	std::cout
-		<< "BOP" << std::endl
-		<< "BOS" << std::endl;
-	
 	
 	for (auto it = text.begin(); it != text.end(); it++) {
 		if (isWhiteSpace(*it)) {
@@ -122,37 +107,28 @@ void MarkovGraph::insertText(std::string &text) {
 				continue;		
 			} else {
 				insertToken(temp);
-				std::cout << temp << std::endl;
 				temp.clear();
 			}
 		} else if (*it == '.') {
 			if (!temp.empty()) {
 				insertToken(temp);
-				std::cout << temp << std::endl;
 				temp.clear();
 			}
 			insertToken(EOS);
-			std::cout << "EOS" << std::endl;
 			endedSentence = true;
 		} else {
 			if (endedSentence) {
 				insertToken(BOS);
-				std::cout << "BOS" << std::endl;
 				endedSentence = false;
 			}
 			temp += *it;
 		}
 
 	}
-	if (!temp.empty()) {
+	if (!temp.empty())
 		insertToken(temp);
-		std::cout << temp << std::endl;
-	}
-	if (!endedSentence) {
-		std::cout << "EOS" << std::endl;
+	if (!endedSentence)
 		insertToken(EOS);
-	}
-	std::cout << "EOP" << std::endl;
 	insertToken(EOP);
 	last = nullptr;
 }
@@ -168,5 +144,36 @@ void MarkovGraph::print() {
 
 // Generate random text
 std::unique_ptr<std::string> MarkovGraph::genText() {
+	std::unique_ptr<std::string> text(new std::string);
+	std::list<Token>::iterator start;
+	bool beginSentence;
+	Token *next;
 
+	// find beginning token
+	for (start = tokens.begin(); start != tokens.end(); start++)
+		if (start->getToken() == BOP)
+			break;
+	// Did not find BOP token
+	if (start == tokens.end())
+		return text;
+
+	// initialize to BOP
+	next = &(*start);
+
+	// iterate until we get to EOP
+	while (next->getToken() != EOP) {
+		std::string token = next->getToken();
+		if (token == BOP || token == BOS) {
+			// do nothing
+		} else if (token == EOS) {
+			(*text).back() = '.';
+			*text += " ";
+		} else {
+			*text += token;
+			*text += " ";
+		}
+		
+		next = &(next->refs.begin()->token);	
+	}
+	return text;
 }

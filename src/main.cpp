@@ -4,13 +4,16 @@
 // File Name: main.cpp
 // Date: 2018-08-31
 
-#include "../inc/markov-graph.hpp"
+#include <iostream>
+
+#include "markov-graph.hpp"
 
 int main() {
 	MarkovGraph dict;
-	std::string text = "This is  a sentence. This is another";	
+	std::string text = "This is  a sentence.";	
 	dict.insertText(text);	
-	text = "not going to to \nthis";
+	text = "This is  another sentence.";	
 	dict.insertText(text);	
-	dict.print();
+	std::unique_ptr<std::string> newText = dict.genText();
+	std::cout << *newText << std::endl;
 }
