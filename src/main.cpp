@@ -10,7 +10,7 @@
 
 int main() {
 	MarkovGraph dict;
-	std::string text = "This is  a sentence.";	
+	std::string text = "This is  a sentence. Here is someone";	
 	dict.insertText(text);	
 	text = "This is  another sentence.";	
 	dict.insertText(text);	

@@ -11,9 +11,12 @@
 // converted to lower case text so that structural tokens can be recorded in
 // upper case.
 
+#include "markov-graph.hpp"
+
 #include <iostream>
 #include <algorithm>
-#include "markov-graph.hpp"
+#include <cstdlib>
+#include <ctime>
 
 // Check for whitespace -- whitespace is defined as asci characters under the
 // value 21 and above value 126
@@ -149,6 +152,9 @@ std::unique_ptr<std::string> MarkovGraph::genText() {
 	bool beginSentence;
 	Token *next;
 
+	// seed the random generator
+	srand(time(NULL));
+
 	// find beginning token
 	for (start = tokens.begin(); start != tokens.end(); start++)
 		if (start->getToken() == BOP)
@@ -173,7 +179,16 @@ std::unique_ptr<std::string> MarkovGraph::genText() {
 			*text += " ";
 		}
 		
-		next = &(next->refs.begin()->token);	
+		// Determine the next token to use.
+		int randCount = rand() % next->count;
+		int acc = 0;
+		auto it = next->refs.begin();
+		for (; it != next->refs.end(); it++) {
+			acc += it->count;
+			if (acc > randCount)
+				break;
+		}
+		next = &(it->token);	
 	}
 	return text;
 }
